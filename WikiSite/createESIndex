@@ -1,0 +1,17 @@
+#!/bin/bash
+# Enable Elasticsearch Index.
+siteprefix=$1
+fileDir="/var/www/virtual/$siteprefix/LocalSettings.php"
+#echo ${fileDir}
+if [ -e $fileDir ]; then
+  sed -i '/?>/i $wgDisableSearchUpdate=true' $fileDir 
+  php /var/www/src/extensions/CirrusSearch/maintenance/updateSearchIndexConfig.php --startOver --conf=$fileDir
+  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipLinks --indexOnSkip --conf=$fileDir
+  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipParse --conf=$fileDir
+  sed -i '/wgDisableSearchUpdate/d' $fileDir 
+else
+  echo "No such wikisite"
+  exit 1
+fi
+
+

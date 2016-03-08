@@ -1,0 +1,6 @@
+#!/bin/bash
+# Remove Elasticsearch Index.
+siteprefix=$1
+curl -XDELETE "http://www.huiji.wiki:9200/huiji_sites-$siteprefix*"
+exit 0
+
