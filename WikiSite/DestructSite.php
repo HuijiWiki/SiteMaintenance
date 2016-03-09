@@ -10,7 +10,7 @@ if (php_sapi_name() == "cli") {
     }
 	$i = 1;
 	$sites = '';
-	for( $i = 1; $i < count($argv)-1;  $i++){
+	for( $i = 1; $i < count($argv);  $i++){
 	    $sites .= $argv[$i].' ';
 	}
 	echo "Are you sure you want to destroy $sites?  Type 'yes' to continue: ";
@@ -23,7 +23,7 @@ if (php_sapi_name() == "cli") {
 	echo "\n"; 
 	echo "Thank you, continuing...\n";
 	$i = 1;
-	for( $i = 1; $i < count($argv)-1;  $i++){
+	for( $i = 1; $i < count($argv);  $i++){
 		$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ."destructing ".$argv[$i]."" );
 	    $site = new WikiSite($argv[$i],'','','','');
 	    $site->remove();		
