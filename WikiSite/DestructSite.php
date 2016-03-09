@@ -11,7 +11,7 @@ if (php_sapi_name() == "cli") {
 	$i = 1;
 	$sites = '';
 	for( $i = 1; $i < count($argv)-1;  $i++){
-	    $sites .= $argv[$i].' '	
+	    $sites .= $argv[$i].' ';
 	}
 	echo "Are you sure you want to destroy $sites?  Type 'yes' to continue: ";
 	$handle = fopen ("php://stdin","r");
