@@ -8,10 +8,18 @@ if (php_sapi_name() == "cli") {
     if(!isset($argv)){
     	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: missing arguments" );
     }
-
-    $site = new WikiSite($argv[1]);
+	echo "Are you sure you want to destroy $argv[1]?  Type 'yes' to continue: ";
+	$handle = fopen ("php://stdin","r");
+	$line = fgets($handle);
+	if(trim($line) != 'yes'){
+	    echo "ABORTING!\n";
+	    exit;
+	}
+	echo "\n"; 
+	echo "Thank you, continuing...\n";
+    $site = new WikiSite($argv[1],'','','','');
     $site->remove();
-    $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Finish destructing ".$this->wikiname."(".$this->domainprefix.") wikisite" );
+    $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Finish destructing ".$argv[1]." wikisite" );
 
 } else {
     // Not in cli-mode
