@@ -8,7 +8,12 @@ if (php_sapi_name() == "cli") {
     if(!isset($argv)){
     	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: missing arguments" );
     }
-	echo "Are you sure you want to destroy $argv[1]?  Type 'yes' to continue: ";
+	$i = 1;
+	$sites = '';
+	for( $i = 1; $i < count($argv)-1;  $i++){
+	    $sites .= $argv[$i].' '	
+	}
+	echo "Are you sure you want to destroy $sites?  Type 'yes' to continue: ";
 	$handle = fopen ("php://stdin","r");
 	$line = fgets($handle);
 	if(trim($line) != 'yes'){
@@ -17,9 +22,15 @@ if (php_sapi_name() == "cli") {
 	}
 	echo "\n"; 
 	echo "Thank you, continuing...\n";
-    $site = new WikiSite($argv[1],'','','','');
-    $site->remove();
-    $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Finish destructing ".$argv[1]." wikisite" );
+	$i = 1;
+	for( $i = 1; $i < count($argv)-1;  $i++){
+		$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ."destructing ".$argv[$i]."" );
+	    $site = new WikiSite($argv[$i],'','','','');
+	    $site->remove();		
+	}
+    // $site = new WikiSite($argv[1],'','','','');
+    // $site->remove();
+    $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Finish destructing ".$sites."" );
 
 } else {
     // Not in cli-mode
