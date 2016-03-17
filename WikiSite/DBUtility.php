@@ -108,9 +108,9 @@ class DBUtility
       $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd, $db_name);
       if($conn->connect_error)
       {
-	$HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db connect fail:".$conn->error );	
-        # die("Connection Failed");
-	return FALSE;
+        $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db connect fail:".$conn->error );	
+          # die("Connection Failed");
+        return FALSE;
       }
       $url = 'http://'.$domainprefix.'.huiji.wiki/wiki/$1';
       $api = 'http://'.$domainprefix.'.huiji.wiki/api.php';
@@ -141,21 +141,21 @@ class DBUtility
       }
 
       
-   /**drop a table with given prefix.
-    *
-    * @param type $prefix the domain prefix
-    * @return Boolean. True if sucessful False if not. 
-    */
-   
-   public static function dropTablesWithPrefix($prefix){
-        global $HJLogger, $ProjectName;
+  /**drop a table with given prefix.
+  *
+  * @param type $prefix the domain prefix
+  * @return Boolean. True if sucessful False if not. 
+  */
+
+  public static function dropTablesWithPrefix($prefix){
+    global $HJLogger, $ProjectName;
     $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd);
-      if($conn->connect_error)
-      {
-        # die("Connection Failed");
-	$HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ."db connection fail:".$conn->error );
-	return false;
-      }
+    if($conn->connect_error)
+    {
+    # die("Connection Failed");
+     $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ."db connection fail:".$conn->error );
+     return false;
+    }
       $conn->query("SET group_concat_max_len = 10000");
       $db_name = "huiji_sites";
       $prefix = mysqli_real_escape_string($conn, $prefix);

@@ -71,7 +71,7 @@ class WikiSite extends BaseSite{
            return ErrorMessage::ERROR_NOT_LOG_IN;
         }
        
- 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 2: check user session" );
+ 	    $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 2: check user session" );
         $i = 2;
         $this->showProgress($i);
         $installRet = $this->install();
@@ -85,7 +85,7 @@ class WikiSite extends BaseSite{
         $i = 3;
         $this->showProgress($i);
         if($this->update() != 0){
- 	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: update site" ); 
+ 	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: update site" ); 
            $this->remove();
            return ErrorMessage::ERROR_FAIL_UPDATE_SITE;
         }
@@ -128,46 +128,45 @@ class WikiSite extends BaseSite{
     }
        
     public function checkRule(){
-         global $HJLogger, $ProjectName;
-       $status = 0;
-        $reg = "/[A-Za-z0-9][A-Za-z0-9-]*/i";
-	$name = $this->wikiname;
-	$domain = $this->domainprefix;
+        global $HJLogger, $ProjectName;
+        $status = 0;
+        $reg = "/[A-Za-z0-9][A-Za-z0-9-]*_$/i";
+	    $name = $this->wikiname;
+	    $domain = $this->domainprefix;
 
-	
-    if( strlen( $domain ) === 0 || empty($domain) || empty($name) ) {
-        // empty fielad
-	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is empty" );
-        $status = ErrorMessage::ERROR_DOMAIN_IS_EMPTY;
-    }
-    elseif ( strlen( $domain ) < 3 ) {
-        // too short
-	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too short" );
-        $status = ErrorMessage::ERROR_DOMAIN_TOO_SHORT;
-    }
-    elseif ( strlen( $domain ) > 30 ) {
-        // too long
-       	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too long" );
-	$status = ErrorMessage::ERROR_DOMAIN_TOO_LONG;
-    }
-    elseif( preg_match($reg, $domain) !== 1 && Confidential::IS_PRODUCTION){
-	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is invalid" );
-        $status = ErrorMessage::ERROR_DOMAIN_INVALID_CHAR;
-    }
-    elseif ( strpos ($domain, '.') !== false && Confidential::IS_PRODUCTION ) {
-        //no dot allowed in production server
-	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is bad name" );
-        $status = ErrorMessage::ERROR_DOMAIN_BAD_NAME;
-    }
-        
-    else {
+        if( strlen( $domain ) === 0 || empty($domain) || empty($name) ) {
+            // empty fielad
+    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is empty" );
+            $status = ErrorMessage::ERROR_DOMAIN_IS_EMPTY;
+        }
+        elseif ( strlen( $domain ) < 4 ) {
+            // too short
+    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too short" );
+            $status = ErrorMessage::ERROR_DOMAIN_TOO_SHORT;
+        }
+        elseif ( strlen( $domain ) > 30 ) {
+            // too long
+           	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too long" );
+    	   $status = ErrorMessage::ERROR_DOMAIN_TOO_LONG;
+        }
+        elseif( preg_match($reg, $domain) !== 1 && Confidential::IS_PRODUCTION){
+    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is invalid" );
+            $status = ErrorMessage::ERROR_DOMAIN_INVALID_CHAR;
+        }
+        elseif ( strpos ($domain, '.') !== false && Confidential::IS_PRODUCTION ) {
+            //no dot allowed in production server
+    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is bad name" );
+            $status = ErrorMessage::ERROR_DOMAIN_BAD_NAME;
+        }
+            
+        else {
             if( DBUtility::domainExists( $domain) ) {
-		$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain already exits" );
+                $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain already exits" );
                 $status = ErrorMessage::ERROR_DOMAIN_NAME_TAKEN;
             }
-    }
-   
-    return $status;
+        }
+       
+        return $status;
     }
     
     
@@ -208,15 +207,15 @@ class WikiSite extends BaseSite{
         umask($oldmask);
         // use shared avatars and awards from the main site.
         exec('ln -s /var/www/html/uploads/avatars '.$structure."/uploads/avatars",$output,$return_code);
-	if($return_code > 0) {
-		$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: link dir" );
-		return ErrorMessage::ERROR_FAIL_LINK_FOLDER;
-	}
-        exec('ln -s /var/www/html/uploads/awards '.$structure."/uploads/awards",$output,$return_code);
-	if($return_code > 0) {
-		$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: link dir" );
-		return ErrorMessage::ERROR_FAIL_LINK_FOLDER;
-	}
+    	if($return_code > 0) {
+    		$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: link dir" );
+    		return ErrorMessage::ERROR_FAIL_LINK_FOLDER;
+    	}
+            exec('ln -s /var/www/html/uploads/awards '.$structure."/uploads/awards",$output,$return_code);
+    	if($return_code > 0) {
+    		$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: link dir" );
+    		return ErrorMessage::ERROR_FAIL_LINK_FOLDER;
+    	}
 
         exec('ln -s /var/www/src/* '.$structure,$output,$return_code);
 
