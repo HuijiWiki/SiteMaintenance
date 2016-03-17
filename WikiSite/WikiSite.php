@@ -270,7 +270,7 @@ class WikiSite extends BaseSite{
         $confpath = " --confpath=".$structure;
         $pass = " --pass=123123 ";
         $install_db = " --installdbuser=".Confidential::$username." --installdbpass=".Confidential::$pwd;
-        $db_info= " --dbserver=".Confidential::$servername." --dbname=huiji_sites --dbprefix=".$domainDir;
+        $db_info= " --dbserver=".Confidential::$servername." --dbname=huiji_sites --dbprefix=".$domainDir.'_';
         $script_path = " --scriptpath=";
         $lang = " --lang=zh-cn";
         $install_cmd = $install_cmd.$name_admin.$confpath.$pass.$install_db.$db_info.$script_path.$lang;
