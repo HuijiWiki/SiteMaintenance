@@ -87,7 +87,7 @@ class WikiSite extends BaseSite{
         $i = 3;
         $this->showProgress($i);
         if($this->update() != 0){
- 	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: update site" ); 
+ 	       $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: update site" ); 
            $this->remove();
            return ErrorMessage::ERROR_FAIL_UPDATE_SITE;
         }
@@ -360,8 +360,8 @@ class WikiSite extends BaseSite{
     public static function dropSiteDB($domainprefix){ 
 	    global $HJLogger, $ProjectName;
             if(DBUtility::dropDB($domainprefix) == false){
-	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: drop ".$domainprefix." DB");
-	    return ErrorMessage::ERROR_FAIL_DATABASE_DROP;
+	           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: drop ".$domainprefix." DB");
+	           return ErrorMessage::ERROR_FAIL_DATABASE_DROP;
         }
 	return 0;
         

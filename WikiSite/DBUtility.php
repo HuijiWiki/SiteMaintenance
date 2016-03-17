@@ -146,7 +146,7 @@ class DBUtility
   * @return Boolean. True if sucessful False if not. 
   */
 
-  public static function dropTablesWithPrefix($prefix, $id){
+  public static function dropTablesWithPrefix($prefix, $id = 150){
     global $HJLogger, $ProjectName;
     $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd);
     if($conn->connect_error)
