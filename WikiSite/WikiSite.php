@@ -10,6 +10,7 @@ require_once('Logger.php');
 class WikiSite extends BaseSite{
     
     public $domainprefix ;
+    public $dbprefix;
     public $wikiname;
     public $domaintype;
     public $domaindsp; 
@@ -39,6 +40,7 @@ class WikiSite extends BaseSite{
      */
     public function __construct($prefix, $name, $type, $dsp , $manifestName){
         $this->domainprefix = $prefix;
+        $this->dbprefix = $prefix.'_';
         $this->wikiname = $name;
         $this->domaintype = $type;
         $this->domaindsp = $dsp;
@@ -53,7 +55,7 @@ class WikiSite extends BaseSite{
         global $HJLogger, $ProjectName;
         //----------------------------------------
         // Total processes
-	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Start building ".$this->wikiname."(".$this->domainprefix.") wikisite" );
+	   $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Start building ".$this->wikiname."(".$this->domainprefix.") wikisite" );
         $ruleRet = $this->checkRule();
         if($ruleRet != 0){
             //the input from user is not valid, need to ask him to do it again
@@ -130,7 +132,7 @@ class WikiSite extends BaseSite{
     public function checkRule(){
         global $HJLogger, $ProjectName;
         $status = 0;
-        $reg = "/[A-Za-z0-9][A-Za-z0-9-]*_$/i";
+        $reg = "/^[A-Za-z0-9][A-Za-z0-9-]$/i";
 	    $name = $this->wikiname;
 	    $domain = $this->domainprefix;
 
@@ -303,7 +305,6 @@ class WikiSite extends BaseSite{
 	   return ErrorMessage::ERROR_FAIL_DATABASE_INSERT;
 
 	}
-	;
         return 0;
     }
 
@@ -314,11 +315,11 @@ class WikiSite extends BaseSite{
    **/
 
   public function install(){
-        global $HJLogger, $ProjectName;
+    global $HJLogger, $ProjectName;
 
     if(self::createSiteFileDir($this->domainprefix) > 0){
-	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create wikisite file directions and files " );
-	return ErrorMessage::ERROR_FAIL_CREATE_DIR;
+	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create wikisite file directions and files " );
+	   return ErrorMessage::ERROR_FAIL_CREATE_DIR;
     }
 
     if($this->installSiteByMWScript() > 0){
@@ -436,8 +437,8 @@ class WikiSite extends BaseSite{
      * @return int : 0 if success, ERROR_CODE if fail
      */
     public function checkUserSession(){
-                global $HJLogger, $ProjectName;
-$session_cookie = 'huiji_session';
+        global $HJLogger, $ProjectName;
+        $session_cookie = 'huiji_session';
         if(!isset($_COOKIE[$session_cookie]))
         {
 	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: get user cookie" );
@@ -515,8 +516,8 @@ $session_cookie = 'huiji_session';
     * @return int : 0 if success, ERROR_CODE if fail
     **/
     public static function migrateWikia($fromDomain, $toDomain){
-                global $HJLogger, $ProjectName;
-$params = array('fromDomain'=>$fromDomain, 'targetDomain'=>$toDomain);
+        global $HJLogger, $ProjectName;
+        $params = array('fromDomain'=>$fromDomain, 'targetDomain'=>$toDomain);
         $ch = curl_init();
         $param_url = http_build_query($params);
         curl_setopt($ch, CURLOPT_URL, 'http://www.huiji.wiki:3000/service/mm?'.$param_url);
@@ -540,25 +541,25 @@ $params = array('fromDomain'=>$fromDomain, 'targetDomain'=>$toDomain);
     * @return int:  0 if the curl call is sucessful, false ERROR_CODE.
     **/
     public static function migrateInitialManifest($domainprefix){ 
-                global $HJLogger, $ProjectName;
-$targetDomain = $domainprefix.".huiji.wiki";
+        global $HJLogger, $ProjectName;
+        $targetDomain = $domainprefix.".huiji.wiki";
         $fromDomain = "templatemanager.huiji.wiki";
         $manifestName = "Manifest:灰机基础包";
         $params = array('fromDomain' => $fromDomain, 'targetDomain' => $targetDomain,'skeletonName' => $manifestName);
         $ch = curl_init();
         $param_url = http_build_query($params);
        
-	curl_setopt($ch, CURLOPT_URL, 'http://www.huiji.wiki:3000/service/smp?'.$param_url);
+	    curl_setopt($ch, CURLOPT_URL, 'http://www.huiji.wiki:3000/service/smp?'.$param_url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         //curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
         $ret = curl_exec($ch);
-	if($ret == false){
-	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: get curl call" );
-           curl_close($ch);
-           return ErrorMessage::ERROR_FAIL_CURL_CALL;
-	} 
-	curl_close($ch);
+    	if($ret == false){
+    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: get curl call" );
+               curl_close($ch);
+               return ErrorMessage::ERROR_FAIL_CURL_CALL;
+    	} 
+        curl_close($ch);
         return 0;
     }
 
@@ -588,14 +589,14 @@ $targetDomain = $domainprefix.".huiji.wiki";
          * @return int 0 if suceessfu.
          */
     public static function updateLocalSettings($wikiname,$wikiid,$domainprefix){
-	global $HJLogger, $ProjectName;
+	    global $HJLogger, $ProjectName;
         #$domainDir = str_replace(".","_",$domainprefix);
         $fileName = '/var/www/virtual/'.$domainprefix.'/LocalSettings.php';
         $templateName = '/var/www/src/LocalSettings.php.example';
         if(self::copyTemplateLocalSetting($templateName,$fileName) == false){
-	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: copy template local setting file" );
-	   return ErrorMessage::ERROR_FAIL_COPY_FILE;
-	}
+    	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: copy template local setting file" );
+    	    return ErrorMessage::ERROR_FAIL_COPY_FILE;
+        }
         $file_contents = file_get_contents($fileName);
         $file_contents = str_replace("%wikiname%",$wikiname,$file_contents);
         $file_contents = str_replace("%domainprefix%",$domainprefix,$file_contents);
@@ -609,20 +610,20 @@ $targetDomain = $domainprefix.".huiji.wiki";
     * $domainprefix : the domain prefix for the new wiki
     */
     public static function updateSiteByMWScript($domainprefix){
-               global $HJLogger, $ProjectName;
- $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/update 2> /var/log/site-maintenance/update.err";
-	$con = 1;
-	$count = 0;
-	while($con > 0 && $count <= 4){
-	   exec($command,$out,$return_code);
-	   $con = $return_code;
-	   $count++;
-	}
-	if($con > 0){
-           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec call" );
-	   return ErrorMessage::ERROR_FAIL_EXEC_CALL;
-	}
-	return 0;
+        global $HJLogger, $ProjectName;
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/update 2> /var/log/site-maintenance/update.err";
+    	$con = 1;
+    	$count = 0;
+    	while($con > 0 && $count <= 4){
+    	   exec($command,$out,$return_code);
+    	   $con = $return_code;
+    	   $count++;
+    	}
+    	if($con > 0){
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec call" );
+            return ErrorMessage::ERROR_FAIL_EXEC_CALL;
+    	}
+    	return 0;
     }
 
     /**
@@ -632,18 +633,18 @@ $targetDomain = $domainprefix.".huiji.wiki";
     */
    
     public function update(){
-             global $HJLogger, $ProjectName;
-if(self::updateLocalSettings($this->wikiname,$this->id,$this->domainprefix) > 0){
-	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: update LocalSetting.php " );
-	return ErrorMessage::ERROR_FAIL_UPDATE_LOCALSETTING;
-     }
+        global $HJLogger, $ProjectName;
+        if(self::updateLocalSettings($this->wikiname,$this->id,$this->domainprefix) > 0){
+        	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: update LocalSetting.php " );
+        	return ErrorMessage::ERROR_FAIL_UPDATE_LOCALSETTING;
+        }
 
-     if($ret = self::updateSiteByMWScript($this->domainprefix) > 0){
-        $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki update.php to maintenance extra dbs for extensions " );
-        return ErrorMessage::ERROR_FAIL_EXE_UPDATE_CMD;
-     }
-     
-     return 0;
+        if($ret = self::updateSiteByMWScript($this->domainprefix) > 0){
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki update.php to maintenance extra dbs for extensions " );
+            return ErrorMessage::ERROR_FAIL_EXE_UPDATE_CMD;
+        }
+
+        return 0;
    }
 
    
@@ -656,24 +657,24 @@ if(self::updateLocalSettings($this->wikiname,$this->id,$this->domainprefix) > 0)
     * @return int : 0 success, ERROR_CODE fail;
     */
     public static function promoteUserWikiSiteStageToAdmin($domainprefix, $userid){
-              global $HJLogger, $ProjectName;
-  $command = "php /var/www/virtual/".$domainprefix."/maintenance/createAndPromoteFromId.php --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --force --bureaucrat --sysop ".$userid;
+        global $HJLogger, $ProjectName;
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/createAndPromoteFromId.php --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --force --bureaucrat --sysop ".$userid;
         exec($command,$out,$return_code);
-	if($return_code >0){
-	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec");
-           return ErrorMessage::ERROR_FAIL_EXEC_CALL;
-	}
-	return 0;
+        if($return_code >0){
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec");
+            return ErrorMessage::ERROR_FAIL_EXEC_CALL;
+        }
+        return 0;
     }
 
     
     public function promote(){
-              global $HJLogger, $ProjectName;
-if(self::promoteUserWikiSiteStageToAdmin($this->domainprefix,$this->founderid) > 0){
-          $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: promote user:".$userid." to the admin stage of wiki:".$domainprefix);
- 	 return ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
-      }
-      return 0;
+        global $HJLogger, $ProjectName;
+        if(self::promoteUserWikiSiteStageToAdmin($this->domainprefix,$this->founderid) > 0){
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: promote user:".$userid." to the admin stage of wiki:".$domainprefix);
+            return ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
+        }
+        return 0;
 
     }
 

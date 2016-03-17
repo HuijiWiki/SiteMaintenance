@@ -14,9 +14,9 @@ class DBUtility
       $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd);
       if($conn->connect_error)
       {
-	$HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db connect fail:".$conn->error );	
+	       $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db connect fail:".$conn->error );	
         # die("Connection Failed");
-	return FALSE;
+	       return FALSE;
       }
       // statement to execute
       $name = mysqli_real_escape_string($conn, $name);
@@ -27,10 +27,10 @@ class DBUtility
       $query = $conn->query($sql);
       if ($query === false) 
       {
-	$HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db query fail:".$conn->error );	
+	       $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db query fail:".$conn->error );	
          #die('Query Error');
          $conn->close();
-	 return FALSE;
+	       return FALSE;
       }
       // extract the value
       $dbExists = (bool) ($query->num_rows < 0);
@@ -38,7 +38,6 @@ class DBUtility
       #echo "value :".$dbExists;
       return $dbExists;
    }
-
 
   
 
@@ -62,9 +61,9 @@ class DBUtility
       $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd, $db_name);
       if($conn->connect_error)
       {
-	 $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db connect fail:".$conn->error);
-         #die("Connection Failed");
-	 return FALSE;
+        $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db connect fail:".$conn->error);
+             #die("Connection Failed");
+        return FALSE;
       }
       $domainprefix = mysqli_real_escape_string($conn, $domainprefix);
       $domainname = mysqli_real_escape_string($conn, $domainname);
@@ -136,8 +135,8 @@ class DBUtility
     * @param type $name the domain prefix
     * @return Boolean. True if sucessful False if not. 
     */
-   public static function dropDB($name){
-         return self::dropTablesWithPrefix($name); 
+   public static function dropDB($name, $id){
+         return self::dropTablesWithPrefix($name, $id); 
       }
 
       
@@ -147,7 +146,7 @@ class DBUtility
   * @return Boolean. True if sucessful False if not. 
   */
 
-  public static function dropTablesWithPrefix($prefix){
+  public static function dropTablesWithPrefix($prefix, $id){
     global $HJLogger, $ProjectName;
     $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd);
     if($conn->connect_error)
@@ -156,12 +155,19 @@ class DBUtility
      $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ."db connection fail:".$conn->error );
      return false;
     }
+      if ( $id > 131 ){
+        $dbPrefix = $prefix.'_';
+
+      }
+      else{
+        $dbPrefix = $prefix;
+      }
       $conn->query("SET group_concat_max_len = 10000");
       $db_name = "huiji_sites";
       $prefix = mysqli_real_escape_string($conn, $prefix);
       $sql = "SELECT CONCAT( 'DROP TABLE ', GROUP_CONCAT(table_name) , ';' ) \n"
     . " AS statement FROM information_schema.tables \n"
-    . " WHERE table_schema = '".$db_name."' AND table_name LIKE '".$prefix."%'";
+    . " WHERE table_schema = '".$db_name."' AND table_name LIKE '".$dbPrefix."%'";
       $result = $conn->query($sql);
       $row = $result->fetch_row();
       $result->close();
