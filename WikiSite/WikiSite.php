@@ -132,7 +132,7 @@ class WikiSite extends BaseSite{
     public function checkRule(){
         global $HJLogger, $ProjectName;
         $status = 0;
-        $reg = "/^[A-Za-z0-9][A-Za-z0-9-]$/i";
+        $reg = "/^[A-Za-z0-9][A-Za-z0-9-]*$/i";
 	    $name = $this->wikiname;
 	    $domain = $this->domainprefix;
 
@@ -151,11 +151,11 @@ class WikiSite extends BaseSite{
            	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too long" );
     	   $status = ErrorMessage::ERROR_DOMAIN_TOO_LONG;
         }
-        elseif( preg_match($reg, $domain) !== 1 && Confidential::IS_PRODUCTION){
+        elseif( preg_match($reg, $domain) !== 1 ){
     	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is invalid" );
             $status = ErrorMessage::ERROR_DOMAIN_INVALID_CHAR;
         }
-        elseif ( strpos ($domain, '.') !== false && Confidential::IS_PRODUCTION ) {
+        elseif ( strpos ($domain, 'fuck') !== false || strpos ($domain, 'sex') !== false || strpos ($domain, 'porn') !== false) {
             //no dot allowed in production server
     	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is bad name" );
             $status = ErrorMessage::ERROR_DOMAIN_BAD_NAME;
