@@ -135,7 +135,7 @@ class DBUtility
     * @param type $name the domain prefix
     * @return Boolean. True if sucessful False if not. 
     */
-   public static function dropDB($name, $id){
+   public static function dropDB($name, $id = null){
          return self::dropTablesWithPrefix($name, $id); 
       }
 

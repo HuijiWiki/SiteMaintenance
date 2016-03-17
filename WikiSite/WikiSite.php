@@ -105,13 +105,13 @@ class WikiSite extends BaseSite{
         $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 5: promote user privilege" );
         $i = 6;
         $this->showProgress($i);
-	if($this->migrate() != 0){
+	    if($this->migrate() != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 6: migrate" );
 	   //$this->remove();
            //return ErrorMessage::ERROR_FAIL_MIGRATE;
         }
         
-	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 6: migrate" );
+	   $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 6: migrate" );
         $i = 7;
         $this->showProgress($i);
         if(self::createESIndex($this->domainprefix) != 0){
