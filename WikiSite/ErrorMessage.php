@@ -1,4 +1,3 @@
-
 <?php
 class ErrorMessage{
 	//domain check error messages
@@ -60,6 +59,6 @@ class ErrorMessage{
     const ERROR_FAIL_CLEAR_DOMAIN_TABLE                = 38;
     const ERROR_FAIL_CLEAR_INTERWIKI_TABLE             = 39;
     const ERROR_FAIL_MIGRATE                           = 40;
- 
+    const ERROR_NO_USR_SESSION                         = 41; 
+    const ERROR_FAIL_ES_AND_PROMOTE_PRI                = 42;
 }
-?>

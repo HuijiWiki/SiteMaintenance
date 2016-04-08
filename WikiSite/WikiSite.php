@@ -3,11 +3,12 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once('DBUtility.php');
-require_once('ErrorMessage.php');
-require_once('../BaseSite.php');
-require_once('Logger.php');
-class WikiSite extends BaseSite{
+require_once(__DIR__.'/DBUtility.php');
+require_once(__DIR__.'/ErrorMessage.php');
+require_once(__DIR__.'/../BaseSite.php');
+require_once(__DIR__.'/../WebSocket.php');
+require_once(__DIR__.'/Logger.php');
+class WikiSite extends BaseSite implements WebSocket{
     
     public $domainprefix ;
     public $dbprefix;
@@ -20,14 +21,11 @@ class WikiSite extends BaseSite{
     private $steps = array(
         1 => '点火准备',
         2 => '请检查氧气阀压力',
-        3 => '请确认带好毛巾',
-        4 => '请系好安全带',
-        5 => '主发动机点火中……',
-        6 => '请不要恐慌',
-        7 => '倒计时开始……',
-        8 => '灰机已经起飞！重复一遍，灰机已经起飞！',
+        3 => '请系好安全带',
+        4 => '主发动机点火中……',
+        5 => '请不要恐慌',
+        6 => '灰机已经起飞！重复一遍，灰机已经起飞！',
     );
-    private $id;
 
 
     /** Constructor
@@ -38,132 +36,161 @@ class WikiSite extends BaseSite{
      * @param type $type wiki type
      * @param type $dsp wiki description
      */
-    public function __construct($prefix, $name, $type, $dsp , $manifestName){
+    public function __construct($prefix, $name, $type, $dsp , $manifestName, $userId, $userName){
         $this->domainprefix = $prefix;
         $this->dbprefix = $prefix.'_';
         $this->wikiname = $name;
         $this->domaintype = $type;
         $this->domaindsp = $dsp;
         $this->manifestName = $manifestName;
+	$this->founderid = $userId;
+	$this->foundername = $userName;
     }
+   
+
+
+    public function sendMessage($conn,$data){
+	$conn->send(json_encode($data));
     
+    }
+    public function receiveMessage($conn,$data){
+
+
+    }
+
+    public function creationStepProgress($connection,$status,$action,$step,$extra,$percent){
+	if($connection == null){
+		$this->showProgress($step);
+	}else{
+		$m = (object)[
+			'step' => $step,
+			'extra' => $extra,
+			'percent' => $percent,
+		];
+	
+		$data = (object)[
+			'status' => $status,
+			'action' => $action,
+			'message' => $m,
+		];
+		$this->sendMessage($connection,$data);
+	}
+    }
+ 
+
     /** Create a complete working sub wiki
      * 
      * @return Int; if not sucessful return the error code else 0;
      */
-    public function create(){
+    public function create($connection){
         global $HJLogger, $ProjectName;
         //----------------------------------------
         // Total processes
-	   $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Start building ".$this->wikiname."(".$this->domainprefix.") wikisite" );
-        $ruleRet = $this->checkRule();
-        if($ruleRet != 0){
-            //the input from user is not valid, need to ask him to do it again
-	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 1: check role" );
-            return ErrorMessage::ERROR_FAIL_CHECK_RULE;
-        }
 
-        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 1: check role" );
-        $i = 1;
-        $this->showProgress($i);
-        $sessionRet = $this->checkUserSession();
+	$returnCode = 0; 
+	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Start building ".$this->wikiname."(".$this->domainprefix.") wikisite" );
+       
+
+        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 1: check user session" );
+        $sessionRet = $this->setFounderInfo($connection);
         if($sessionRet != 0){
-            //user is not logged in. redirect him to the log_in page
-           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 2: check user session" );
+           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 1: check user session" );
+	   $this->creationStepProgress($connection, "fail", "create", 1, "用户未登陆", 10);
            return ErrorMessage::ERROR_NOT_LOG_IN;
         }
-       
- 	    $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 2: check user session" );
-        $i = 2;
-        $this->showProgress($i);
+ 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 1: check user session" );
+        $this->creationStepProgress($connection, "success", "create", 1, "用户已登录", 10);
+
+
+	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 2: install site" );
         $installRet = $this->install();
         if($installRet != 0){
-	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 3: install site" );
+	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 2: install site" );
             $this->remove();
+	    $this->creationStepProgress($connection, "fail", "create", 2, "安装站点失败", 40);
             return ErrorMessage::ERROR_FAIL_INSTALL_SITE;
         }
+        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 2: install site" );
+	$this->creationStepProgress($connection, "success", "create", 2, "安装站点成功", 40);
 
-        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 3: install site" );
-        $i = 3;
-        $this->showProgress($i);
+	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 3: update site" );
         if($this->update() != 0){
- 	       $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: update site" ); 
+ 	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 3: update site" ); 
            $this->remove();
+	   $this->creationStepProgress($connection, "fail", "create", 3, "更新站点失败", 70);
            return ErrorMessage::ERROR_FAIL_UPDATE_SITE;
         }
+        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 3: update site" ); 
+        $this->creationStepProgress($connection, "success", "create", 3, "更新站点成功", 70);
 
-        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 4: update site" ); 
-        $i = 4;
-        $this->showProgress($i);
+
+	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 4: promote user privilege" );
         if($this->promote() != 0){
-           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 5: promote user privilege" );
-           return ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
+           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: promote user privilege" );
+	   $this->creationStepProgress($connection, "fail", "create", 4, "提升权限失败", 80);
+           $returnCode = ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
         }
-        // stop the process for 2 seconds, give system more time to update wiki.
-        sleep(2);
+        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 4: promote user privilege" );	
+        $this->creationStepProgress($connection, "success", "create", 4, "提升权限成功", 80);
 
-        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 5: promote user privilege" );
-        $i = 6;
-        $this->showProgress($i);
-	    if($this->migrate() != 0){
-           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 6: migrate" );
-	   //$this->remove();
-           //return ErrorMessage::ERROR_FAIL_MIGRATE;
+
+	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 5: migrate" );
+	if($this->migrate() != 0){
+           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 5: migrate" );
+	   $this->remove();
+	   $this->creationStepProgress($connection, "fail", "create", 5, "搬运模版失败", 90);
+           return ErrorMessage::ERROR_FAIL_MIGRATE;
         }
-        
-	   $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 6: migrate" );
-        $i = 7;
-        $this->showProgress($i);
+        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 5: migrate" );
+        $this->creationStepProgress($connection, "success", "create", 5, "搬运模版成功", 90);
+
+
+	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 6: enable ES service" );
         if(self::createESIndex($this->domainprefix) != 0){
-           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 5: enable ES service" );
-           return ErrorMessage::ERROR_FAIL_ENABLE_ES;
+           $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 6: enable ES service" );
+	   $this->creationStepProgress($connection, "fail", "create", 6, "搜索功能失败", 100);
+           $returnCode = ErrorMessage::ERROR_FAIL_ENABLE_ES;
         }
-         
-        $i = 8;
-        $this->showProgress($i);
-        // header('Location: http://'.$domainprefix.'.huiji.wiki');
-        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 5: enable ES service" );
-        // $this->migrateInitialTemplate($this->domainprefix, $this->template);
-        //redirect to the newly created wiki
+	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 6: enable ES service" );         
+        $this->creationStepProgress($connection, "success", "create", 6, "搜索功能成功", 100);
+
        	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Finish building ".$this->wikiname."(".$this->domainprefix.") wikisite" );
-        return 0; 
+        return $returnCode; 
     }
        
-    public function checkRule(){
-        global $HJLogger, $ProjectName;
+    public static function checkRule($name, $domain){
+#       global $HJLogger, $ProjectName;
         $status = 0;
         $reg = "/^[A-Za-z0-9][A-Za-z0-9-]*$/i";
-	    $name = $this->wikiname;
-	    $domain = $this->domainprefix;
 
         if( strlen( $domain ) === 0 || empty($domain) || empty($name) ) {
             // empty fielad
-    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is empty" );
+#    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is empty" );
             $status = ErrorMessage::ERROR_DOMAIN_IS_EMPTY;
         }
         elseif ( strlen( $domain ) < 4 ) {
             // too short
-    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too short" );
+ #   	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too short" );
             $status = ErrorMessage::ERROR_DOMAIN_TOO_SHORT;
         }
         elseif ( strlen( $domain ) > 30 ) {
             // too long
-           	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too long" );
+#           	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is too long" );
     	   $status = ErrorMessage::ERROR_DOMAIN_TOO_LONG;
         }
         elseif( preg_match($reg, $domain) !== 1 ){
-    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is invalid" );
+#    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is invalid" );
             $status = ErrorMessage::ERROR_DOMAIN_INVALID_CHAR;
         }
         elseif ( strpos ($domain, 'fuck') !== false || strpos ($domain, 'sex') !== false || strpos ($domain, 'porn') !== false) {
             //no dot allowed in production server
-    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is bad name" );
+#    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain is bad name" );
             $status = ErrorMessage::ERROR_DOMAIN_BAD_NAME;
         }
             
         else {
             if( DBUtility::domainExists( $domain) ) {
-                $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain already exits" );
+#               $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Check: site domain already exits" );
                 $status = ErrorMessage::ERROR_DOMAIN_NAME_TAKEN;
             }
         }
@@ -177,10 +204,8 @@ class WikiSite extends BaseSite{
      * @return Int, return error code if not successful, 0 if successful
      */
     public static function createSiteFileDir($domainprefix){
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
         $name = $domainprefix;
-          global $HJLogger, $ProjectName;
+        global $HJLogger, $ProjectName;
   
         $structure = "/var/www/virtual/".$name;
         
@@ -273,7 +298,8 @@ class WikiSite extends BaseSite{
         $db_info= " --dbserver=".Confidential::$servername." --dbname=huiji_sites --dbprefix=".$domainDir.'_';
         $script_path = " --scriptpath=";
         $lang = " --lang=zh-cn";
-        $install_cmd = $install_cmd.$name_admin.$confpath.$pass.$install_db.$db_info.$script_path.$lang;
+	$out = " >/var/log/site-maintenance/install.log 2> /var/log/site-maintenance/install.err";
+        $install_cmd = $install_cmd.$name_admin.$confpath.$pass.$install_db.$db_info.$script_path.$lang.$out;
         exec($install_cmd,$out,$return_code);
 	if($return_code > 0)
 	{
@@ -402,7 +428,7 @@ class WikiSite extends BaseSite{
    public static function removeESIndex($domainprefix){
 	global $HJLogger, $ProjectName;
         $localPrefix = strtolower($domainprefix);
-	$cmd = "./removeESIndex $localPrefix ";
+	$cmd = __DIR__."/removeESIndex $localPrefix ";
 	exec($cmd,$output,$return_code);
 	if($return_code > 0){
 	  $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: call exec" );
@@ -423,7 +449,7 @@ class WikiSite extends BaseSite{
     public static function createESIndex($domainprefix){
 	global $HJLogger, $ProjectName;
         $localPrefix = strtolower($domainprefix);
-	$cmd = "./createESIndex $localPrefix >/var/log/es/out 2>/var/log/es/err & ";
+	$cmd = __DIR__."/createESIndex $localPrefix >/var/log/site-maintenance/es.log 2> /var/log/site-maintenance/es.err";
 	exec($cmd,$output,$return_code);
 	if($return_code > 0){
 	  $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: call exec" );
@@ -431,7 +457,17 @@ class WikiSite extends BaseSite{
 	}
 	return 0;
   }
-    
+   
+   public function setFounderInfo($conn){
+	if($conn == null){
+		return $this->checkUserSession();
+	}
+	sleep(3);
+	return 0;
+   }
+   
+
+ 
     /**Check the current user session
      * 
      * @return int : 0 if success, ERROR_CODE if fail
@@ -458,11 +494,11 @@ class WikiSite extends BaseSite{
 		$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: get curl call" );
 		return ErrorMessage::ERROR_FAIL_CURL_CALL;
 	    }
-            if((preg_match('/id="(\d+)"/',$ret,$id) && $id[1]) && (preg_match('/name="(.*?)"/u',$ret,$name))){
+            if((preg_match('/id="(\d+)"/',$ret,$userId) && $userId[1]) && (preg_match('/name="(.*?)"/u',$ret,$userName))){
                 #pop a simple window for user to wait 
                 #   return $id;
-                $this->founderid = $id[1];
-                $this->foundername = $name[1];
+                $this->founderid = $userId[1];
+                $this->foundername = $userName[1];
                 return 0;
             }
             else{
@@ -549,16 +585,30 @@ class WikiSite extends BaseSite{
         $ch = curl_init();
         $param_url = http_build_query($params);
        
-	    curl_setopt($ch, CURLOPT_URL, 'http://www.huiji.wiki:3000/service/smp?'.$param_url);
+	curl_setopt($ch, CURLOPT_URL, 'http://www.huiji.wiki:3000/service/smp?'.$param_url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         //curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-        $ret = curl_exec($ch);
+
+	$ret = false;
+	$count = 0;
+	
+	while(($ret == false || json_decode($ret)->status == 'fail') && $count <=2){	
+        	$ret = curl_exec($ch);
+		$count++;
+	}
     	if($ret == false){
-    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: get curl call" );
+    	       $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: get curl call" );
                curl_close($ch);
                return ErrorMessage::ERROR_FAIL_CURL_CALL;
-    	} 
+    	}
+//	var_dump($ret);
+	if(json_decode($ret)->status == 'fail'){
+	       $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: migrate service error" );
+               curl_close($ch);
+               return ErrorMessage::ERROR_FAIL_MIGRATE;
+
+	}
         curl_close($ch);
         return 0;
     }
@@ -611,7 +661,7 @@ class WikiSite extends BaseSite{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/update 2> /var/log/site-maintenance/update.err";
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/update.log 2> /var/log/site-maintenance/update.err";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
@@ -658,7 +708,7 @@ class WikiSite extends BaseSite{
     */
     public static function promoteUserWikiSiteStageToAdmin($domainprefix, $userid){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/createAndPromoteFromId.php --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --force --bureaucrat --sysop ".$userid;
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/createAndPromoteFromId.php --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/promote.log 2> /var/log/site-maintenance/promote.err" ;
         exec($command,$out,$return_code);
         if($return_code >0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec");
@@ -726,7 +776,20 @@ class WikiSite extends BaseSite{
         echo str_repeat(' ',1024*64);
         flush();
     }
+
+    public static function generate_send_object($status, $data, $action){
+		
+	return (object)[
+		'status' => $status,
+		'message' => $data,
+		'action' => $action,
+	];
+       // return "{\"status\":\"$status\", \"message\":\"$data\", \"action\":\"$action\"}";
+    }
   
 }   
 
+#$t=new WikiSite("kk01");
+#$t->remove();
+#var_dump(DBUtility::domainExists( "kk02"));
 ?>

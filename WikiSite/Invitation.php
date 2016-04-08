@@ -1,19 +1,16 @@
 <?php
-
 /**
  * Description of Invitatio
  *
  * @author minyitang
  */
-require_once('InvitationDB.php');
-require_once('ErrorMessage.php');
+require_once(__DIR__.'/InvitationDB.php');
+require_once(__DIR__.'/ErrorMessage.php');
 class Invitation {
     //put your code here
     const INVITATION_USED               = 1;
     const INVITATION_NOT_FOUND          = 2;
-    
-  
-    
+
     /** Check the usage status of a given invitation code. 
      * 
      * @param String $inv The invitation code user provided
@@ -21,7 +18,7 @@ class Invitation {
      */
     public static function checkInvitation($inv){
       $ret = InvitationDB::queryInvDB($inv);
-      return $ret; 
+      return $ret;
     }
     
     /** set an invitation code to expire.
@@ -57,4 +54,3 @@ class Invitation {
         return $out;
     }
 }
-?>

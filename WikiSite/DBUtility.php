@@ -10,8 +10,9 @@ class DBUtility
    *@return bool
    */
    public static function domainExists($name, $language=null, $type=null){
-        global $HJLogger, $ProjectName;
-      $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd);
+      global $HJLogger, $ProjectName;	
+      $db_name = "huiji";
+      $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd,$db_name);
       if($conn->connect_error)
       {
 	       $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db connect fail:".$conn->error );	
@@ -20,22 +21,21 @@ class DBUtility
       }
       // statement to execute
       $name = mysqli_real_escape_string($conn, $name);
-      $db_name = "huiji";
-      $sql = 'SELECT `domain_id` AS `exists` FROM huiji.domain WHERE domain.domain_prefix=\''.$name.'\'';
+      $sql = 'SELECT `domain_id` AS `exists` FROM domain WHERE domain_prefix=\''.$name.'\'';
       # echo  $sql;
       // execute the statement
       $query = $conn->query($sql);
       if ($query === false) 
       {
-	       $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db query fail:".$conn->error );	
-         #die('Query Error');
+	 $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ." db query fail:".$conn->error );	
+ #       die('Query Error');
          $conn->close();
 	       return FALSE;
       }
       // extract the value
-      $dbExists = (bool) ($query->num_rows < 0);
+      $dbExists = ($query->num_rows <= 0) ? false : true;
       $conn->close();
-      #echo "value :".$dbExists;
+#      echo "value :".$dbExists;
       return $dbExists;
    }
 
@@ -306,7 +306,33 @@ class DBUtility
    }
 
 
+   /**
+    * check domain name
+    * @param   $[domainName] [<domain name>]
+    * @return bollean [exist return true, null return false]
+    */
+   static function checkDomainName( $domainName ){
+      global $HJLogger;
+      $db_name = "huiji";
+      $conn = mysqli_connect(Confidential::$servername,Confidential::$username,Confidential::$pwd, $db_name);
+          if($conn->connect_error)
+          {
+             $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ."db connection fail:".$conn->error );
+             #die("Connection Failed");
+             return false;
+          }
+
+     $sql = "SELECT * from domain WHERE domain_name ='".$domainName."'";
+     $res = $conn->query($sql);
+     if( $res->num_rows > 0  ){
+           $conn->close();
+           return true;
+      }else{
+            // echo 'error:'.$conn->error;
+            $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ."db query fail:".$conn->error );
+            $conn->close();
+            return false;
+      }
+   }
+
 }
-
-
-?>
