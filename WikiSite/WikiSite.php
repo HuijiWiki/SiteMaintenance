@@ -788,7 +788,7 @@ class WikiSite extends BaseSite implements WebSocket{
     }
   
 }   
-
+###
 #$t=new WikiSite("kk01");
 #$t->remove();
 #var_dump(DBUtility::domainExists( "kk02"));
