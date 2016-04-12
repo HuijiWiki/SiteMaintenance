@@ -310,7 +310,7 @@ class WikiSite extends BaseSite implements WebSocket{
         $db_info= " --dbserver=".Confidential::$servername." --dbname=huiji_sites --dbprefix=".$domainDir.'_';
         $script_path = " --scriptpath=";
         $lang = " --lang=zh-cn";
-	$out = " >/var/log/site-maintenance/install.log 2> /var/log/site-maintenance/install.err";
+	$out = " >/var/log/site-maintenance/wikisite/install.log 2> /var/log/site-maintenance/wikisite/install.err";
         $install_cmd = $install_cmd.$name_admin.$confpath.$pass.$install_db.$db_info.$script_path.$lang.$out;
         exec($install_cmd,$out,$return_code);
 	if($return_code > 0)
@@ -461,7 +461,7 @@ class WikiSite extends BaseSite implements WebSocket{
     public static function createESIndex($domainprefix){
 	global $HJLogger, $ProjectName;
         $localPrefix = strtolower($domainprefix);
-	$cmd = __DIR__."/createESIndex $localPrefix >/var/log/site-maintenance/es.log 2> /var/log/site-maintenance/es.err";
+	$cmd = __DIR__."/createESIndex $localPrefix >/var/log/site-maintenance/wikisite/es.log 2> /var/log/site-maintenance/wikisite/es.err";
 	exec($cmd,$output,$return_code);
 	if($return_code > 0){
 	  $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: call exec" );
@@ -673,7 +673,7 @@ class WikiSite extends BaseSite implements WebSocket{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/update.log 2> /var/log/site-maintenance/update.err";
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
