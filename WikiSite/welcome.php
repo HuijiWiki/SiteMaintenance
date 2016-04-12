@@ -52,8 +52,8 @@ if($ruleCheck != 0){
 }
 
 
-//$invCheck = Invitation::checkInvitation($invcode);
-$invCheck = 0;
+$invCheck = Invitation::checkInvitation($invcode);
+//$invCheck = 0;
 if($invCheck == ErrorMessage::INV_NOT_FOUND){
 	
     echo "<p style='text-align:center'>无效的激活码</p>"; 
