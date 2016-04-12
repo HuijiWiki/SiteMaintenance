@@ -2,7 +2,7 @@
     <appender name="default" class="LoggerAppenderRollingFile">
         <layout class="LoggerLayoutSimple" />
         <param name="file" value="/var/log/site-maintenance/wikisite/huiji.log" />
-        <param name="maxFileSize" value="10MB" />
+        <param name="maxFileSize" value="5MB" />
         <param name="maxBackupIndex" value="5" />
     </appender>
     <root>

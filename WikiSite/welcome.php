@@ -52,7 +52,8 @@ if($ruleCheck != 0){
 }
 
 
-$invCheck = Invitation::checkInvitation($invcode);
+//$invCheck = Invitation::checkInvitation($invcode);
+$invCheck = 0;
 if($invCheck == ErrorMessage::INV_NOT_FOUND){
 	
     echo "<p style='text-align:center'>无效的激活码</p>"; 
@@ -79,7 +80,7 @@ if($ret == ErrorMessage::ERROR_NOT_LOG_IN){
     die();
 }
 elseif ($ret == 0){
-    Invitation::expireInvitation($invcode);
+//    Invitation::expireInvitation($invcode);
     echo "<p style='text-align:center'>创建站点 $wikiname 成功</p>";
     echo "\n\n\n";
     echo "<a href='http://$domainprefix.huiji.wiki' style='text-align:center;display:block'>访问新站点:$wikiname</a>";
