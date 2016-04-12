@@ -76,7 +76,12 @@ class WikiSite extends BaseSite implements WebSocket{
 		$this->sendMessage($connection,$data);
 	}
     }
- 
+
+
+   public function mSleep(){
+	sleep(3);
+	return 0;
+   } 
 
     /** Create a complete working sub wiki
      * 
@@ -86,11 +91,11 @@ class WikiSite extends BaseSite implements WebSocket{
         global $HJLogger, $ProjectName;
         //----------------------------------------
         // Total processes
-
+	
 	$returnCode = 0; 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Start building ".$this->wikiname."(".$this->domainprefix.") wikisite" );
        
-
+	
         $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 1: check user session" );
         $sessionRet = $this->setFounderInfo($connection);
         if($sessionRet != 0){
@@ -103,6 +108,7 @@ class WikiSite extends BaseSite implements WebSocket{
 
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 2: install site" );
+//	$installRet = $this->mSleep();
         $installRet = $this->install();
         if($installRet != 0){
 	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 2: install site" );
@@ -114,7 +120,9 @@ class WikiSite extends BaseSite implements WebSocket{
 	$this->creationStepProgress($connection, "success", "create", 2, "安装站点成功", 40);
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 3: update site" );
-        if($this->update() != 0){
+//      $updateRet = $this->mSleep();
+	$updateRet = $this->update();
+        if($updateRet != 0){
  	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 3: update site" ); 
            $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 3, "更新站点失败", 70);
@@ -125,17 +133,21 @@ class WikiSite extends BaseSite implements WebSocket{
 
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 4: promote user privilege" );
-        if($this->promote() != 0){
+//	$promoteRet = $this->mSleep();
+        $promoteRet = $this->promote();
+        if($promoteRet != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: promote user privilege" );
 	   $this->creationStepProgress($connection, "fail", "create", 4, "提升权限失败", 80);
            $returnCode = ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
-        }
-        $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 4: promote user privilege" );	
-        $this->creationStepProgress($connection, "success", "create", 4, "提升权限成功", 80);
-
+        }else{
+           $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 4: promote user privilege" );	
+           $this->creationStepProgress($connection, "success", "create", 4, "提升权限成功", 80);
+	}
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 5: migrate" );
-	if($this->migrate() != 0){
+//        $migrateRet = $this->mSleep();
+        $migrateRet = $this->migrate();
+	if($migrateRet != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 5: migrate" );
 	   $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 5, "搬运模版失败", 90);
@@ -150,10 +162,10 @@ class WikiSite extends BaseSite implements WebSocket{
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 6: enable ES service" );
 	   $this->creationStepProgress($connection, "fail", "create", 6, "搜索功能失败", 100);
            $returnCode = ErrorMessage::ERROR_FAIL_ENABLE_ES;
-        }
-	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 6: enable ES service" );         
-        $this->creationStepProgress($connection, "success", "create", 6, "搜索功能成功", 100);
-
+        }else{
+	   $HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Pass Setp 6: enable ES service" );         
+           $this->creationStepProgress($connection, "success", "create", 6, "搜索功能成功", 100);
+	}
        	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." ##### Finish building ".$this->wikiname."(".$this->domainprefix.") wikisite" );
         return $returnCode; 
     }
@@ -788,8 +800,7 @@ class WikiSite extends BaseSite implements WebSocket{
     }
   
 }   
-###
-#$t=new WikiSite("kk01");
+#$t=new WikiSite("kk04");
 #$t->remove();
 #var_dump(DBUtility::domainExists( "kk02"));
 ?>
