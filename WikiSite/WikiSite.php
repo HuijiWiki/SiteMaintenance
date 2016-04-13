@@ -720,7 +720,7 @@ class WikiSite extends BaseSite implements WebSocket{
     */
     public static function promoteUserWikiSiteStageToAdmin($domainprefix, $userid){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/createAndPromoteFromId.php --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/promote.log 2> /var/log/site-maintenance/promote.err" ;
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/createAndPromoteFromId.php --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/wikisite/promote.log 2> /var/log/site-maintenance/wikisite/promote.err" ;
         exec($command,$out,$return_code);
         if($return_code >0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec");
