@@ -327,6 +327,9 @@ class DBUtility
      if( $res->num_rows > 0  ){
            $conn->close();
            return true;
+      }else if($res->num_rows <=0) {
+	   $conn->close();
+	   return false;
       }else{
             // echo 'error:'.$conn->error;
             $HJLogger->error("SiteMaintenance ". __FILE__ ." ". __LINE__ ."db query fail:".$conn->error );
