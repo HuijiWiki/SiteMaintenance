@@ -112,7 +112,7 @@ class WikiSite extends BaseSite implements WebSocket{
         $installRet = $this->install();
         if($installRet != 0){
 	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 2: install site" );
-            $this->remove();
+//          $this->remove();
 	    $this->creationStepProgress($connection, "fail", "create", 2, "安装站点失败", 40);
             return ErrorMessage::ERROR_FAIL_INSTALL_SITE;
         }
@@ -124,7 +124,7 @@ class WikiSite extends BaseSite implements WebSocket{
 	$updateRet = $this->update();
         if($updateRet != 0){
  	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 3: update site" ); 
-           $this->remove();
+//         $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 3, "更新站点失败", 70);
            return ErrorMessage::ERROR_FAIL_UPDATE_SITE;
         }
@@ -149,7 +149,7 @@ class WikiSite extends BaseSite implements WebSocket{
         $migrateRet = $this->migrate();
 	if($migrateRet != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 5: migrate" );
-	   $this->remove();
+//	   $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 5, "搬运模版失败", 90);
            return ErrorMessage::ERROR_FAIL_MIGRATE;
         }
@@ -800,7 +800,7 @@ class WikiSite extends BaseSite implements WebSocket{
     }
   
 }   
-#$t=new WikiSite("kk04");
+#$t=new WikiSite("dota1");
 #$t->remove();
 #var_dump(DBUtility::domainExists( "kk02"));
 ?>
