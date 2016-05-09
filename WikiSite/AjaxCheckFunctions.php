@@ -7,7 +7,7 @@ require_once('DBUtility.php');
 require_once('Invitation.php');
 //check domain name
 if ( $_POST['action'] == 'checkDomainName' ) {
-    $name = trim( $_POST['name'] );
+    $name = $_POST['name'];
     if ( empty($name) ) {
         echo '{"result": "false","message": "名称不能为空"}';
     }elseif ( strlen($name) > 30 ) {
@@ -20,7 +20,7 @@ if ( $_POST['action'] == 'checkDomainName' ) {
 }
 //check prefix url
 if ( $_POST['action'] == 'checkPrefixUrl' ) {
-    $prefix = trim( $_POST['prefix'] );
+    $prefix = $_POST['prefix'];
     $reg = "/^[A-Za-z0-9][A-Za-z0-9-]*$/i";
     if ( empty($prefix) ) {
         echo '{"result": "false","message": "url不能为空"}';
@@ -38,7 +38,7 @@ if ( $_POST['action'] == 'checkPrefixUrl' ) {
 }
 //check invite code
 if( $_POST['action'] == 'inviteCode' ){
-    $inviteCode = trim( $_POST['inviteCode'] );
+    $inviteCode = $_POST['inviteCode'];
     if ( empty($inviteCode) ) {
         echo '{"result": "false","message": "邀请码不能为空"}';
     }else if ( Invitation::checkInvitation( $inviteCode ) == 0 ) {
