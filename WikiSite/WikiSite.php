@@ -108,11 +108,10 @@ class WikiSite extends BaseSite implements WebSocket{
 
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 2: install site" );
-//	$installRet = $this->mSleep();
         $installRet = $this->install();
         if($installRet != 0){
 	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 2: install site" );
-//          $this->remove();
+          $this->remove();
 	    $this->creationStepProgress($connection, "fail", "create", 2, "安装站点失败", 40);
             return ErrorMessage::ERROR_FAIL_INSTALL_SITE;
         }
@@ -120,11 +119,10 @@ class WikiSite extends BaseSite implements WebSocket{
 	$this->creationStepProgress($connection, "success", "create", 2, "安装站点成功", 40);
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 3: update site" );
-//      $updateRet = $this->mSleep();
 	$updateRet = $this->update();
         if($updateRet != 0){
  	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 3: update site" ); 
-//         $this->remove();
+         $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 3, "更新站点失败", 70);
            return ErrorMessage::ERROR_FAIL_UPDATE_SITE;
         }
@@ -133,7 +131,6 @@ class WikiSite extends BaseSite implements WebSocket{
 
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 4: promote user privilege" );
-//	$promoteRet = $this->mSleep();
         $promoteRet = $this->promote();
         if($promoteRet != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: promote user privilege" );
@@ -145,11 +142,10 @@ class WikiSite extends BaseSite implements WebSocket{
 	}
 
 	$HJLogger->info("$ProjectName ". __FILE__ ." ". __LINE__ ." Start Setp 5: migrate" );
-//        $migrateRet = $this->mSleep();
         $migrateRet = $this->migrate();
 	if($migrateRet != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 5: migrate" );
-//	   $this->remove();
+	   $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 5, "搬运模版失败", 90);
            return ErrorMessage::ERROR_FAIL_MIGRATE;
         }
@@ -236,6 +232,11 @@ class WikiSite extends BaseSite implements WebSocket{
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create dir" );
             return ErrorMessage::ERROR_FAIL_CREATE_CACHE;
         }
+	if(!mkdir($structure."/style",0777,true)) {
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create dir" );
+            return ErrorMessage::ERROR_FAIL_FOLDER;
+        }
+
         //the source link from the linked folder
         // if($srcDir == null){
         //  $srcDir = "/var/www/src/extensions/SocialProfile";   
@@ -267,9 +268,10 @@ class WikiSite extends BaseSite implements WebSocket{
       */
     public static function removeSiteFileDir($domainprefix){
         global $HJLogger, $ProjectName;
-
+	$domainprefix = trim($domainprefix);
         $structure = "/var/www/virtual/".$domainprefix;
-        $cmd = "rm -r ".$structure;
+	$target = "/var/backups/".$domainprefix.'-'.time();
+        $cmd = "mv ".$structure." ".$target;
         exec($cmd, $output, $return_var);
         if($return_var){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: remove dir " );
@@ -359,6 +361,8 @@ class WikiSite extends BaseSite implements WebSocket{
 	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create wikisite file directions and files " );
 	   return ErrorMessage::ERROR_FAIL_CREATE_DIR;
     }
+
+    self::createDefaultStyleFile($this->domainprefix);
 
     if($this->installSiteByMWScript() > 0){
        $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki install.php script to install new wikisite" );        
@@ -626,6 +630,20 @@ class WikiSite extends BaseSite implements WebSocket{
     }
 
 
+    public static function createDefaultStyleFile($sitePrefix){
+	$target = '/var/www/virtual/'.$sitePrefix.'/style/SiteColor.less';
+	if((copy('/var/www/src/style/SiteColor.less', $target) == false) || (chmod($target, 0777) == false)){
+		$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: copy site style color file" );
+           	 return ErrorMessage::ERROR_FAIL_COPY_FILE;
+	}else{
+		return 0;
+	}
+    }
+
+
+
+
+
 
         /** Replace the current LocalSettings.php after it is generated
          * 
@@ -800,7 +818,4 @@ class WikiSite extends BaseSite implements WebSocket{
     }
   
 }   
-#$t=new WikiSite("dota1");
-#$t->remove();
-#var_dump(DBUtility::domainExists( "kk02"));
 ?>
