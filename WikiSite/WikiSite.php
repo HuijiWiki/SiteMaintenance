@@ -134,6 +134,7 @@ class WikiSite extends BaseSite implements WebSocket{
         $promoteRet = $this->promote();
         if($promoteRet != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: promote user privilege" );
+           $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 4, "提升权限失败", 80);
            $returnCode = ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
         }else{
@@ -703,9 +704,7 @@ class WikiSite extends BaseSite implements WebSocket{
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
     	}
-        $command = " php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
-                $con = 1;
-        $count = 0;
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
         
         exec($command,$out,$return_code);
 
