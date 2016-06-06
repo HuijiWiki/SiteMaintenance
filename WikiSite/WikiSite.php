@@ -43,8 +43,8 @@ class WikiSite extends BaseSite implements WebSocket{
         $this->domaintype = $type;
         $this->domaindsp = $dsp;
         $this->manifestName = $manifestName;
-	$this->founderid = $userId;
-	$this->foundername = $userName;
+	   $this->founderid = $userId;
+	   $this->foundername = $userName;
     }
    
 
@@ -691,7 +691,8 @@ class WikiSite extends BaseSite implements WebSocket{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err;";
+        $command .= " php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
