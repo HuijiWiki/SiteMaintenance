@@ -697,7 +697,7 @@ class WikiSite extends BaseSite implements WebSocket{
     	$count = 0;
     	while($con > 0 && $count <= 4){
     	   exec($command,$out,$return_code);
-           file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL, $out));
+           file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL, $out), FILE_APPEND);
     	   $con = $return_code;
     	   $count++;
     	}
@@ -705,11 +705,11 @@ class WikiSite extends BaseSite implements WebSocket{
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
     	}
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant";
-        
-        exec($command,$out,$return_code);
-        file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out));
-        if($return_code > 0){
+        file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND)
+        $command2 = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant";
+        exec($command2,$out2,$return_code2);
+        file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out2), FILE_APPEND);
+        if($return_code2 > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
         }
