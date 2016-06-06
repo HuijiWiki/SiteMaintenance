@@ -713,7 +713,7 @@ class WikiSite extends BaseSite implements WebSocket{
      */
     public static function rebuildLocalisationCacheByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND)
+        file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND);
         $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant";
         exec($command,$out,$return_code);
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out), FILE_APPEND);
