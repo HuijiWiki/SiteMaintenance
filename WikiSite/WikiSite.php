@@ -692,11 +692,12 @@ class WikiSite extends BaseSite implements WebSocket{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err;";
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
     	   exec($command,$out,$return_code);
+           file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL, $out));
     	   $con = $return_code;
     	   $count++;
     	}
@@ -704,10 +705,10 @@ class WikiSite extends BaseSite implements WebSocket{
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
     	}
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant";
         
         exec($command,$out,$return_code);
-
+        file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out));
         if($return_code > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
