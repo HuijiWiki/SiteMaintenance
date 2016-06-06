@@ -712,12 +712,12 @@ class WikiSite extends BaseSite implements WebSocket{
      * Run rebuildLocalisationCache.php to create cdb cache files on the disk. This is needed if we set   
      * $wgLocalisationCacheConf['manualRecacht'] = true; We have to set it to true in hhvm enviroment.
      */
-    public static function updateSiteByMWScript($domainprefix){
+    public static function rebuildLocalisationCacheByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND)
         $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant";
         exec($command,$out,$return_code);
-        file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out2), FILE_APPEND);
+        file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out), FILE_APPEND);
         if($return_code > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
@@ -741,6 +741,10 @@ class WikiSite extends BaseSite implements WebSocket{
         if($ret = self::updateSiteByMWScript($this->domainprefix) > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki update.php to maintenance extra dbs for extensions " );
             return ErrorMessage::ERROR_FAIL_EXE_UPDATE_CMD;
+        }
+        if($ret = self::rebuildLocalisationCacheByMWScript($this->domainprefix) > 0){
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache to populate i10n cache" );
+            return ErrorMessage::ERROR_FAIL_EXE_REBUID_LOCALISATION_CACHE;
         }
 
         return 0;
