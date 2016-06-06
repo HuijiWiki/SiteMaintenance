@@ -293,7 +293,7 @@ class WikiSite extends BaseSite implements WebSocket{
      * @return int error code if fails, 0 if successful
      */
     
-   public function installSiteBycScript(){
+   public function installSiteByMWScript(){
          global $HJLogger, $ProjectName;
       //create wll the script params
 	$domainprefix = $this->domainprefix;
