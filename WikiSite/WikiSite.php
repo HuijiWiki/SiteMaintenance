@@ -50,7 +50,7 @@ class WikiSite extends BaseSite implements WebSocket{
 
 
     public function sendMessage($conn,$data){
-	$conn->send(json_encode($data));
+	   $conn->send(json_encode($data));
     
     }
     public function receiveMessage($conn,$data){
@@ -293,7 +293,7 @@ class WikiSite extends BaseSite implements WebSocket{
      * @return int error code if fails, 0 if successful
      */
     
-   public function installSiteByMWScript(){
+   public function installSiteBycScript(){
          global $HJLogger, $ProjectName;
       //create wll the script params
 	$domainprefix = $this->domainprefix;
@@ -692,7 +692,6 @@ class WikiSite extends BaseSite implements WebSocket{
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
         $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err;";
-        $command .= " php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
@@ -704,6 +703,16 @@ class WikiSite extends BaseSite implements WebSocket{
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
     	}
+        $command = " php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php >/var/log/site-maintenance/wikisite/update.log 2> /var/log/site-maintenance/wikisite/update.err";
+                $con = 1;
+        $count = 0;
+        
+        exec($command,$out,$return_code);
+
+        if($return_code > 0){
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache exec call" );
+            return ErrorMessage::ERROR_FAIL_EXEC_CALL;
+        }
     	return 0;
     }
 
