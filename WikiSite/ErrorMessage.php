@@ -61,4 +61,5 @@ class ErrorMessage{
     const ERROR_FAIL_MIGRATE                           = 40;
     const ERROR_NO_USR_SESSION                         = 41; 
     const ERROR_FAIL_ES_AND_PROMOTE_PRI                = 42;
+    const ERROR_FAIL_EXE_REBUID_LOCALISATION_CACHE     = 43;
 }

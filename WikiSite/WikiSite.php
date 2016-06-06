@@ -705,15 +705,24 @@ class WikiSite extends BaseSite implements WebSocket{
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
     	}
+    	return 0;
+    }
+
+    /**
+     * Run rebuildLocalisationCache.php to create cdb cache files on the disk. This is needed if we set   
+     * $wgLocalisationCacheConf['manualRecacht'] = true; We have to set it to true in hhvm enviroment.
+     */
+    public static function updateSiteByMWScript($domainprefix){
+        global $HJLogger, $ProjectName;
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND)
-        $command2 = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant";
-        exec($command2,$out2,$return_code2);
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant";
+        exec($command,$out,$return_code);
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out2), FILE_APPEND);
-        if($return_code2 > 0){
+        if($return_code > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache exec call" );
             return ErrorMessage::ERROR_FAIL_EXEC_CALL;
         }
-    	return 0;
+        return 0;
     }
 
     /**
