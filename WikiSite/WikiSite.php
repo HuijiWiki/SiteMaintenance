@@ -134,7 +134,6 @@ class WikiSite extends BaseSite implements WebSocket{
         $promoteRet = $this->promote();
         if($promoteRet != 0){
            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail at Setp 4: promote user privilege" );
-           $this->remove();
 	   $this->creationStepProgress($connection, "fail", "create", 4, "提升权限失败", 80);
            $returnCode = ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
         }else{
