@@ -83,7 +83,7 @@ elseif ($ret == 0){
 //    Invitation::expireInvitation($invcode);
     echo "<p style='text-align:center'>创建站点 $wikiname 成功</p>";
     echo "\n\n\n";
-    echo "<a href='http://$domainprefix.huiji.wiki' style='text-align:center;display:block'>访问新站点:$wikiname</a>";
+    echo "<a href='http://$domainprefix.huiji.wiki/?action=purge' style='text-align:center;display:block'>访问新站点:$wikiname</a>";
     die();
 }
 elseif ($ret == ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE){
@@ -92,7 +92,7 @@ elseif ($ret == ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE){
     echo "\n\n\n";
     echo "<p style='text-align:center'>提升创建者站点权限失败，但不影响站点使用，请创建者联系support@huiji.wiki帮助</p>";
     echo "\n\n\n";
-    echo "<a href='http://$domainprefix.huiji.wiki' style='text-align:center;display:block'>访问新站点:$wikiname</a>";
+    echo "<a href='http://$domainprefix.huiji.wiki/?action=purge' style='text-align:center;display:block'>访问新站点:$wikiname</a>";
     die();
 }
 elseif ($ret == ErrorMessage::ERROR_FAIL_ENABLE_ES){
@@ -102,7 +102,7 @@ elseif ($ret == ErrorMessage::ERROR_FAIL_ENABLE_ES){
     echo "\n\n\n";
     echo "<p style='text-align:center'>搜索功能开启失败，但不影响站点使用，请创建者联系support@huiji.wiki帮助</p>";
     echo "\n\n\n";
-    echo "<a href='http://$domainprefix.huiji.wiki' style='text-align:center;display:block'>访问新站点:$wikiname</a>";
+    echo "<a href='http://$domainprefix.huiji.wiki/?action=purge' style='text-align:center;display:block'>访问新站点:$wikiname</a>";
     die();
 }
 else{

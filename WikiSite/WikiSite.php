@@ -691,7 +691,7 @@ class WikiSite extends BaseSite implements WebSocket{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick";
+        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick --nopurge";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
@@ -737,13 +737,13 @@ class WikiSite extends BaseSite implements WebSocket{
         	return ErrorMessage::ERROR_FAIL_UPDATE_LOCALSETTING;
         }
 
-        if($ret = self::updateSiteByMWScript($this->domainprefix) > 0){
-            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki update.php to maintenance extra dbs for extensions " );
-            return ErrorMessage::ERROR_FAIL_EXE_UPDATE_CMD;
-        }
         if($ret = self::rebuildLocalisationCacheByMWScript($this->domainprefix) > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache to populate i10n cache" );
             return ErrorMessage::ERROR_FAIL_EXE_REBUID_LOCALISATION_CACHE;
+        }
+        if($ret = self::updateSiteByMWScript($this->domainprefix) > 0){
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki update.php to maintenance extra dbs for extensions " );
+            return ErrorMessage::ERROR_FAIL_EXE_UPDATE_CMD;
         }
 
         return 0;
