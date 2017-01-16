@@ -8,12 +8,15 @@ require_once('Invitation.php');
 //check domain name
 if ( $_POST['action'] == 'checkDomainName' ) {
     $name = $_POST['name'];
+    $reg = "/[@\/\\]+/";
     if ( empty($name) ) {
         echo '{"result": "false","message": "名称不能为空"}';
     }elseif ( strlen($name) > 30 ) {
         echo '{"result": "false","message": "名称过长"}';
     }elseif ( DBUtility::checkDomainName( $name ) ) {
         echo '{"result": "false","message": "名称已存在"}';
+    }elseif ( preg_match($reg, $name) != 0 ){
+        echo '{"result": "false","message": "名称不能含有特殊字符"}';
     }else{
         echo '{"result": "success","message": "success"}';
     }

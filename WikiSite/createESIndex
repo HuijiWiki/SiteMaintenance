@@ -7,7 +7,8 @@ if [ -e $fileDir ]; then
 #  sed -i '/?>/i $wgDisableSearchUpdate=true' $fileDir 
   php /var/www/src/extensions/CirrusSearch/maintenance/updateSearchIndexConfig.php --startOver --conf=$fileDir
   php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipLinks --indexOnSkip --conf=$fileDir
-  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipParse --conf=$fileDir
+  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipParse --conf=$fileDir 
+  php /var/www/src/extensions/CirrusSearch/maintenance/updateSuggesterIndex.php --conf=$fileDir
 #  sed -i '/wgDisableSearchUpdate/d' $fileDir 
 else
   echo "No such wikisite"
