@@ -24,7 +24,7 @@ if ( $_POST['action'] == 'checkDomainName' ) {
 //check prefix url
 if ( $_POST['action'] == 'checkPrefixUrl' ) {
     $prefix = $_POST['prefix'];
-    $reg = "/^[A-Za-z0-9][A-Za-z0-9-]*$/i";
+    $reg = "/^[A-Za-z0-9][A-Za-z0-9]*$/i";
     if ( empty($prefix) ) {
         echo '{"result": "false","message": "url不能为空"}';
     }elseif ( strlen($prefix) < 3 || strlen($prefix) > 20 ) {

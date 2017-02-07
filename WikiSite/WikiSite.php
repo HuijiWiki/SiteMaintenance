@@ -169,7 +169,7 @@ class WikiSite extends BaseSite implements WebSocket{
     public static function checkRule($name, $domain){
 #       global $HJLogger, $ProjectName;
         $status = 0;
-        $reg = "/^[A-Za-z0-9][A-Za-z0-9-]*$/i";
+        $reg = "/^[A-Za-z0-9][A-Za-z0-9]*$/i";
 
         if( strlen( $domain ) === 0 || empty($domain) || empty($name) ) {
             // empty fielad
