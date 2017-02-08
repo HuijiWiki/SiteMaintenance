@@ -8,7 +8,7 @@ require_once('Invitation.php');
 //check domain name
 if ( $_POST['action'] == 'checkDomainName' ) {
     $name = $_POST['name'];
-    $reg = "/[@\/\\]+/";
+    $reg = "/[@\/\\\\]+/";
     if ( empty($name) ) {
         echo '{"result": "false","message": "名称不能为空"}';
     }elseif ( strlen($name) > 30 ) {
