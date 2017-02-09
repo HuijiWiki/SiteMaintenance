@@ -735,10 +735,10 @@ class WikiSite2 extends BaseSite implements WebSocket{
         // 	return ErrorMessage::ERROR_FAIL_UPDATE_LOCALSETTING;
         // }
 
-        if($ret = self::rebuildLocalisationCacheByMWScript($this->domainprefix) > 0){
-            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache to populate i10n cache" );
-            return ErrorMessage::ERROR_FAIL_EXE_REBUID_LOCALISATION_CACHE;
-        }
+        // if($ret = self::rebuildLocalisationCacheByMWScript($this->domainprefix) > 0){
+        //     $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache to populate i10n cache" );
+        //     return ErrorMessage::ERROR_FAIL_EXE_REBUID_LOCALISATION_CACHE;
+        // }
         if($ret = self::updateSiteByMWScript($this->domainprefix) > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki update.php to maintenance extra dbs for extensions " );
             return ErrorMessage::ERROR_FAIL_EXE_UPDATE_CMD;
