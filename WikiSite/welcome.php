@@ -26,7 +26,8 @@ echo '<!DOCTYPE html">
     <div id="information"></div>
 </div>';
 
-require_once('WikiSite.php');
+// require_once('WikiSite.php');
+require_once('WikiSite2.php');
 require_once('ErrorMessage.php');
 require_once('Invitation.php');
 //require_once('ImportMW.php');
@@ -70,7 +71,7 @@ if($invCheck == ErrorMessage::INV_USED){
 }
 
 
-$wiki = new WikiSite($domainprefix, $wikiname, $type, $dsp, $manifest, null, null);
+$wiki = new WikiSite2($domainprefix, $wikiname, $type, $dsp, $manifest, null, null);
 $ret = $wiki->create(null);
 if($ret == ErrorMessage::ERROR_NOT_LOG_IN){
     echo "<p style='text-align:center'>建站终止</p>";

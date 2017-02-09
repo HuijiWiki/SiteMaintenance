@@ -8,7 +8,7 @@ require_once(__DIR__.'/ErrorMessage.php');
 require_once(__DIR__.'/../BaseSite.php');
 require_once(__DIR__.'/../WebSocket.php');
 require_once(__DIR__.'/Logger.php');
-class WikiSite extends BaseSite implements WebSocket{
+class WikiSite2 extends BaseSite implements WebSocket{
     
     public $domainprefix ;
     public $dbprefix;
@@ -232,7 +232,7 @@ class WikiSite extends BaseSite implements WebSocket{
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create dir" );
             return ErrorMessage::ERROR_FAIL_CREATE_CACHE;
         }
-	if(!mkdir($structure."/style",0777,true)) {
+	    if(!mkdir($structure."/style",0777,true)) {
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create dir" );
             return ErrorMessage::ERROR_FAIL_FOLDER;
         }
@@ -268,9 +268,9 @@ class WikiSite extends BaseSite implements WebSocket{
       */
     public static function removeSiteFileDir($domainprefix){
         global $HJLogger, $ProjectName;
-	    $domainprefix = trim($domainprefix);
+	$domainprefix = trim($domainprefix);
         $structure = "/var/www/virtual/".$domainprefix;
-	    $target = "/var/backups/".$domainprefix.'-'.time();
+	$target = "/var/backups/".$domainprefix.'-'.time();
         $cmd = "mv ".$structure." ".$target;
         exec($cmd, $output, $return_var);
         if($return_var){
@@ -296,15 +296,15 @@ class WikiSite extends BaseSite implements WebSocket{
    public function installSiteByMWScript(){
          global $HJLogger, $ProjectName;
       //create wll the script params
-	$domainprefix = $this->domainprefix;
-	$wikiname = $this->wikiname;
-	$domaintype = $this->domaintype;
-	$domaindsp = $this->domaindsp;
+    	$domainprefix = $this->domainprefix;
+    	$wikiname = $this->wikiname;
+    	$domaintype = $this->domaintype;
+    	$domaindsp = $this->domaindsp;
 
         $domainDir = str_replace(".","_",$domainprefix);
         $name = "huiji_".$domainDir;
-        $structure = '/var/www/virtual/'.$domainprefix;
-        $install_cmd = "php ".$structure."/maintenance/install.php --dbuser=".Confidential::$username." --dbpass=".Confidential::$pwd;
+        $structure = '/var/www/virtual/sites';
+        $install_cmd = "php ".$structure."/maintenance/install.php --wiki={$domainprefix} --dbuser=".Confidential::$username." --dbpass=".Confidential::$pwd;
         $name_admin = " ".$wikiname." ".$wikiname."_admin";
         $confpath = " --confpath=".$structure;
         $pass = " --pass=123123 ";
@@ -312,7 +312,7 @@ class WikiSite extends BaseSite implements WebSocket{
         $db_info= " --dbserver=".Confidential::$servername." --dbname=huiji_sites --dbprefix=".$domainDir.'_';
         $script_path = " --scriptpath=";
         $lang = " --lang=zh-cn";
-	$out = " >/var/log/site-maintenance/wikisite/install.log 2> /var/log/site-maintenance/wikisite/install.err";
+	    $out = " >/var/log/site-maintenance/wikisite/install.log 2> /var/log/site-maintenance/wikisite/install.err";
         $install_cmd = $install_cmd.$name_admin.$confpath.$pass.$install_db.$db_info.$script_path.$lang.$out;
         exec($install_cmd,$out,$return_code);
 	if($return_code > 0)
@@ -330,21 +330,20 @@ class WikiSite extends BaseSite implements WebSocket{
      */
     
    public  function insertWikiSitePrefixIntoDB(){
-          global $HJLogger, $ProjectName;
+        global $HJLogger, $ProjectName;
  
-	$db_key = DBUtility::insertGlobalDomainPrefix($this->domainprefix, $this->wikiname, $this->domaintype, $this->domaindsp, $this->founderid, $this->foundername);
-	if($db_key != FALSE){
-	   $this->id = $db_key;
-	}else{
-	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: insert global domain prefix into DB" );
-	   return ErrorMessage::ERROR_FAIL_DATABASE_INSERT;
-	}
-	
-	if(DBUtility::insertInterwikiPrefix($this->domainprefix, $db_key) == false){
-	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: insert inter domain prefix into DB" );
-	   return ErrorMessage::ERROR_FAIL_DATABASE_INSERT;
-
-	}
+    	$db_key = DBUtility::insertGlobalDomainPrefix($this->domainprefix, $this->wikiname, $this->domaintype, $this->domaindsp, $this->founderid, $this->foundername);
+    	if($db_key != FALSE){
+    	   $this->id = $db_key;
+    	}else{
+    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: insert global domain prefix into DB" );
+    	   return ErrorMessage::ERROR_FAIL_DATABASE_INSERT;
+    	}
+    	
+    	if(DBUtility::insertInterwikiPrefix($this->domainprefix, $db_key) == false){
+    	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: insert inter domain prefix into DB" );
+    	   return ErrorMessage::ERROR_FAIL_DATABASE_INSERT;
+    	}
         return 0;
     }
 
@@ -357,21 +356,20 @@ class WikiSite extends BaseSite implements WebSocket{
   public function install(){
     global $HJLogger, $ProjectName;
 
-    if(self::createSiteFileDir($this->domainprefix) > 0){
-	   $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create wikisite file directions and files " );
-	   return ErrorMessage::ERROR_FAIL_CREATE_DIR;
-    }
+    // if(self::createSiteFileDir($this->domainprefix) > 0){
+	   // $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: create wikisite file directions and files " );
+	   // return ErrorMessage::ERROR_FAIL_CREATE_DIR;
+    // }
 
-    self::createDefaultStyleFile($this->domainprefix);
-
-    if($this->installSiteByMWScript() > 0){
-       $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki install.php script to install new wikisite" );        
-       return ErrorMessage::ERROR_FAIL_EXE_INSTALL_CMD;
-    }
+    // self::createDefaultStyleFile($this->domainprefix);
     $ret = $this->insertWikiSitePrefixIntoDB();
     if($ret > 0){
        $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: insert site prefix in domain and interwiki db " );
        return ErrorMessage::ERROR_FAIL_INSERT_DOMAIN_PREFIX;
+    }
+    if($this->installSiteByMWScript() > 0){
+       $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run mediawiki install.php script to install new wikisite" );        
+       return ErrorMessage::ERROR_FAIL_EXE_INSTALL_CMD;
     }
     return 0;
    
@@ -385,7 +383,7 @@ class WikiSite extends BaseSite implements WebSocket{
 
   public function remove(){
        global $HJLogger, $ProjectName;
-       // self::removeSiteFileDir($this->domainprefix);
+       self::removeSiteFileDir($this->domainprefix);
        self::dropSiteDB($this->domainprefix);
        self::clearWikiSitePrefixInDB($this->domainprefix); 
        self::removeESIndex($this->domainprefix);
@@ -671,17 +669,17 @@ class WikiSite extends BaseSite implements WebSocket{
     public static function updateLocalSettings($wikiname,$wikiid,$domainprefix){
 	    global $HJLogger, $ProjectName;
         #$domainDir = str_replace(".","_",$domainprefix);
-        $fileName = '/var/www/virtual/'.$domainprefix.'/LocalSettings.php';
-        $templateName = '/var/www/src/LocalSettings.php.example';
-        if(self::copyTemplateLocalSetting($templateName,$fileName) == false){
-    	    $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: copy template local setting file" );
-    	    return ErrorMessage::ERROR_FAIL_COPY_FILE;
-        }
-        $file_contents = file_get_contents($fileName);
-        $file_contents = str_replace("%wikiname%",$wikiname,$file_contents);
-        $file_contents = str_replace("%domainprefix%",$domainprefix,$file_contents);
-        $file_contents = str_replace("%wikiid%",$wikiid,$file_contents);
-        file_put_contents($fileName,$file_contents);        
+        // $fileName = '/var/www/virtual/'.$domainprefix.'/LocalSettings.php';
+        // $templateName = '/var/www/src/LocalSettings.php.example';
+        // if(self::copyTemplateLocalSetting($templateName,$fileName) == false){
+    	   //  $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: copy template local setting file" );
+    	   //  return ErrorMessage::ERROR_FAIL_COPY_FILE;
+        // }
+        // $file_contents = file_get_contents($fileName);
+        // $file_contents = str_replace("%wikiname%",$wikiname,$file_contents);
+        // $file_contents = str_replace("%domainprefix%",$domainprefix,$file_contents);
+        // $file_contents = str_replace("%wikiid%",$wikiid,$file_contents);
+        // file_put_contents($fileName,$file_contents);        
         return 0; 
     }
     
@@ -691,7 +689,7 @@ class WikiSite extends BaseSite implements WebSocket{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/update.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --quick --nopurge";
+        $command = "php /var/www/virtual/sites/maintenance/update.php --wiki={$domainprefix} --conf=/var/www/virtual/sites/LocalSettings.php --quick --nopurge";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
@@ -714,7 +712,7 @@ class WikiSite extends BaseSite implements WebSocket{
     public static function rebuildLocalisationCacheByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND);
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/rebuildLocalisationCache.php  --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force";
+        $command = "php /var/www/virtual/sites/maintenance/rebuildLocalisationCache.php  --wiki={$domainprefix} --conf=/var/www/virtual/sites/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force";
         exec($command,$out,$return_code);
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out), FILE_APPEND);
         if($return_code > 0){
@@ -732,10 +730,10 @@ class WikiSite extends BaseSite implements WebSocket{
    
     public function update(){
         global $HJLogger, $ProjectName;
-        if(self::updateLocalSettings($this->wikiname,$this->id,$this->domainprefix) > 0){
-        	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: update LocalSetting.php " );
-        	return ErrorMessage::ERROR_FAIL_UPDATE_LOCALSETTING;
-        }
+        // if(self::updateLocalSettings($this->wikiname,$this->id,$this->domainprefix) > 0){
+        // 	$HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: update LocalSetting.php " );
+        // 	return ErrorMessage::ERROR_FAIL_UPDATE_LOCALSETTING;
+        // }
 
         if($ret = self::rebuildLocalisationCacheByMWScript($this->domainprefix) > 0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run rebuildLocalisationCache to populate i10n cache" );
@@ -760,7 +758,7 @@ class WikiSite extends BaseSite implements WebSocket{
     */
     public static function promoteUserWikiSiteStageToAdmin($domainprefix, $userid){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/".$domainprefix."/maintenance/createAndPromoteFromId.php --conf=/var/www/virtual/".$domainprefix."/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/wikisite/promote.log 2> /var/log/site-maintenance/wikisite/promote.err" ;
+        $command = "php /var/www/virtual/sites/maintenance/createAndPromoteFromId.php --wiki={$domainprefix} --conf=/var/www/virtual/sites/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/wikisite/promote.log 2> /var/log/site-maintenance/wikisite/promote.err" ;
         exec($command,$out,$return_code);
         if($return_code >0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec");
