@@ -304,7 +304,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
         $domainDir = str_replace(".","_",$domainprefix);
         $name = "huiji_".$domainDir;
         $structure = '/var/www/src';
-        $install_cmd = "php ".$structure."/maintenance/install.php --wiki={$domainprefix} --dbuser=".Confidential::$username." --dbpass=".Confidential::$pwd;
+        $install_cmd = "php ".$structure."/maintenance/install.php --wiki=huiji_sites-{$domainprefix} --dbuser=".Confidential::$username." --dbpass=".Confidential::$pwd;
         $name_admin = " ".$wikiname." ".$wikiname."_admin";
         $confpath = " --confpath=/tmp"; //conf
         $pass = " --pass=123123 ";
@@ -689,7 +689,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/src/maintenance/update.php --wiki={$domainprefix} --conf=/var/www/src/LocalSettings.php --quick --nopurge";
+        $command = "php /var/www/src/maintenance/update.php --wiki=huiji_sites-{$domainprefix}_ --conf=/var/www/src/LocalSettings.php --quick --nopurge";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
@@ -712,7 +712,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
     public static function rebuildLocalisationCacheByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND);
-        $command = "php /var/www/src/maintenance/rebuildLocalisationCache.php  --wiki={$domainprefix} --conf=/var/www/src/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force";
+        $command = "php /var/www/src/maintenance/rebuildLocalisationCache.php  --wiki=huiji_sites-{$domainprefix}_ --conf=/var/www/src/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force";
         exec($command,$out,$return_code);
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out), FILE_APPEND);
         if($return_code > 0){
@@ -758,7 +758,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
     */
     public static function promoteUserWikiSiteStageToAdmin($domainprefix, $userid){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/src/maintenance/createAndPromoteFromId.php --wiki={$domainprefix} --conf=/var/www/src/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/wikisite/promote.log 2> /var/log/site-maintenance/wikisite/promote.err" ;
+        $command = "php /var/www/src/maintenance/createAndPromoteFromId.php --wiki=huiji_sites-{$domainprefix}_ --conf=/var/www/src/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/wikisite/promote.log 2> /var/log/site-maintenance/wikisite/promote.err" ;
         exec($command,$out,$return_code);
         if($return_code >0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec");
