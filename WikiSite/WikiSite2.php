@@ -306,7 +306,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
         $structure = '/var/www/virtual/sites';
         $install_cmd = "php ".$structure."/maintenance/install.php --wiki={$domainprefix} --dbuser=".Confidential::$username." --dbpass=".Confidential::$pwd;
         $name_admin = " ".$wikiname." ".$wikiname."_admin";
-        $confpath = " --confpath=".$structure;
+        $confpath = " --confpath=/tmp";
         $pass = " --pass=123123 ";
         $install_db = " --installdbuser=".Confidential::$username." --installdbpass=".Confidential::$pwd;
         $db_info= " --dbserver=".Confidential::$servername." --dbname=huiji_sites --dbprefix=".$domainDir.'_';
@@ -651,13 +651,13 @@ class WikiSite2 extends BaseSite implements WebSocket{
          */
     public static function copyTemplateLocalSetting($srcDir=null, $targetDir=null){
         global $HJLogger, $ProjectName;
-        if($srcDir == null){
-            $srcDir = '/var/www/src/LocalSettings.php.example';
-        }
-        if($targetDir == null){
-            $targetDir = './LocalSettings.php';
-        }
-        return copy($srcDir,$targetDir);
+        // if($srcDir == null){
+        //     $srcDir = '/var/www/src/LocalSettings.php.example';
+        // }
+        // if($targetDir == null){
+        //     $targetDir = './LocalSettings.php';
+        // }
+        // return copy($srcDir,$targetDir);
     }
     /**update the localsetting.s.php
          * 
