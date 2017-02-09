@@ -303,7 +303,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
 
         $domainDir = str_replace(".","_",$domainprefix);
         $name = "huiji_".$domainDir;
-        $structure = '/var/www/virtual/sites';
+        $structure = '/var/www/src';
         $install_cmd = "php ".$structure."/maintenance/install.php --wiki={$domainprefix} --dbuser=".Confidential::$username." --dbpass=".Confidential::$pwd;
         $name_admin = " ".$wikiname." ".$wikiname."_admin";
         $confpath = " --confpath=/tmp";
@@ -383,7 +383,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
 
   public function remove(){
        global $HJLogger, $ProjectName;
-       self::removeSiteFileDir($this->domainprefix);
+       // self::removeSiteFileDir($this->domainprefix);
        self::dropSiteDB($this->domainprefix);
        self::clearWikiSitePrefixInDB($this->domainprefix); 
        self::removeESIndex($this->domainprefix);
@@ -689,7 +689,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
     */
     public static function updateSiteByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/sites/maintenance/update.php --wiki={$domainprefix} --conf=/var/www/virtual/sites/LocalSettings.php --quick --nopurge";
+        $command = "php /var/www/src/maintenance/update.php --wiki={$domainprefix} --conf=/var/www/src/LocalSettings.php --quick --nopurge";
     	$con = 1;
     	$count = 0;
     	while($con > 0 && $count <= 4){
@@ -712,7 +712,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
     public static function rebuildLocalisationCacheByMWScript($domainprefix){
         global $HJLogger, $ProjectName;
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", "Start buiding localisation cache".PHP_EOL, FILE_APPEND);
-        $command = "php /var/www/virtual/sites/maintenance/rebuildLocalisationCache.php  --wiki={$domainprefix} --conf=/var/www/virtual/sites/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force";
+        $command = "php /var/www/src/maintenance/rebuildLocalisationCache.php  --wiki={$domainprefix} --conf=/var/www/src/LocalSettings.php --lang=en,zh-cn,zh,zh-hans,zh-hant --force";
         exec($command,$out,$return_code);
         file_put_contents("/var/log/site-maintenance/wikisite/update.log", implode( PHP_EOL , $out), FILE_APPEND);
         if($return_code > 0){
@@ -758,7 +758,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
     */
     public static function promoteUserWikiSiteStageToAdmin($domainprefix, $userid){
         global $HJLogger, $ProjectName;
-        $command = "php /var/www/virtual/sites/maintenance/createAndPromoteFromId.php --wiki={$domainprefix} --conf=/var/www/virtual/sites/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/wikisite/promote.log 2> /var/log/site-maintenance/wikisite/promote.err" ;
+        $command = "php /var/www/src/maintenance/createAndPromoteFromId.php --wiki={$domainprefix} --conf=/var/www/src/LocalSettings.php --force --bureaucrat --sysop ".$userid." >/var/log/site-maintenance/wikisite/promote.log 2> /var/log/site-maintenance/wikisite/promote.err" ;
         exec($command,$out,$return_code);
         if($return_code >0){
             $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: run exec");
@@ -771,7 +771,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
     public function promote(){
         global $HJLogger, $ProjectName;
         if(self::promoteUserWikiSiteStageToAdmin($this->domainprefix,$this->founderid) > 0){
-            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: promote user:".$userid." to the admin stage of wiki:".$domainprefix);
+            $HJLogger->error("$ProjectName ". __FILE__ ." ". __LINE__ ." Fail: promote user:".$this->founderid." to the admin stage of wiki:".$this->domainprefix);
             return ErrorMessage::ERROR_FAIL_PROMOTE_USER_PRIVILEGE;
         }
         return 0;
