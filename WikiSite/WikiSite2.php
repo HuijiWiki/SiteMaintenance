@@ -306,7 +306,7 @@ class WikiSite2 extends BaseSite implements WebSocket{
         $structure = '/var/www/src';
         $install_cmd = "php ".$structure."/maintenance/install.php --wiki={$domainprefix} --dbuser=".Confidential::$username." --dbpass=".Confidential::$pwd;
         $name_admin = " ".$wikiname." ".$wikiname."_admin";
-        $confpath = " --confpath=/tmp --conf=/var/www/LocalSettings.php"; //conf points to a non-exist file
+        $confpath = " --confpath=/tmp"; //conf
         $pass = " --pass=123123 ";
         $install_db = " --installdbuser=".Confidential::$username." --installdbpass=".Confidential::$pwd;
         $db_info= " --dbserver=".Confidential::$servername." --dbname=huiji_sites --dbprefix=".$domainDir.'_';

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Enable Elasticsearch Index.
 siteprefix=$1
-fileDir="/var/www/virtual/sites/LocalSettings.php"
+fileDir="/var/www/src/LocalSettings.php"
 #echo ${fileDir}
 if [ -e $fileDir ]; then
 #  sed -i '/?>/i $wgDisableSearchUpdate=true' $fileDir 
