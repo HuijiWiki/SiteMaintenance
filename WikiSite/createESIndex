@@ -5,10 +5,10 @@ fileDir="/var/www/src/LocalSettings.php"
 #echo ${fileDir}
 if [ -e $fileDir ]; then
 #  sed -i '/?>/i $wgDisableSearchUpdate=true' $fileDir 
-  php /var/www/src/extensions/CirrusSearch/maintenance/updateSearchIndexConfig.php --startOver --conf=$fileDir
-  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipLinks --indexOnSkip --conf=$fileDir
-  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipParse --conf=$fileDir 
-  php /var/www/src/extensions/CirrusSearch/maintenance/updateSuggesterIndex.php --conf=$fileDir
+  php /var/www/src/extensions/CirrusSearch/maintenance/updateSearchIndexConfig.php --startOver --conf=$fileDir --wiki=huiji_sites-$1_
+  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipLinks --indexOnSkip --conf=$fileDir --wiki=huiji_sites-$1_
+  php /var/www/src/extensions/CirrusSearch/maintenance/forceSearchIndex.php --skipParse --conf=$fileDir --wiki=huiji_sites-$1_
+  php /var/www/src/extensions/CirrusSearch/maintenance/updateSuggesterIndex.php --conf=$fileDir --wiki=huiji_sites-$1_
 #  sed -i '/wgDisableSearchUpdate/d' $fileDir 
 else
   echo "No such wikisite"
